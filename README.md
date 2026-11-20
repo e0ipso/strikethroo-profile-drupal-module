@@ -5,35 +5,29 @@ that contains one Drupal contrib module.
 
 ```sh
 npx strikethroo init --harnesses claude --profile <this-repo>
-npx kenkeep pack import e0ipso/kenkeep-pack-drupal   # recommended, 2.1.1 or later
+npx kenkeep pack import e0ipso/kenkeep-pack-drupal   # recommended, 2.2.0 or later
 ```
 
-Pack 2.1.1 is the first release whose branch summaries survive the import.
-The hooks still work without the pack: they fall back to the rules in
-`config/shared/drupal-contrib.md`.
-
-A profile can replace hooks and `config.yaml`, and the agent runs what they
-say with its own permissions. Read the files before you import them.
+Use pack 2.2.0 or later: earlier releases recommend the lightest test tier,
+which conflicts with this profile's testing rules. Without the pack, the hooks
+use `config/shared/drupal-contrib.md` alone. The agent runs hooks and
+`config.yaml` with its own permissions, so read them before you import.
 
 ## What it changes
 
 | File | Change |
 | --- | --- |
-| `config/shared/drupal-contrib.md` | New. The rules every hook refers to: test tiers and when each runs, SOLID in Drupal terms, code vs. configuration, backwards compatibility, dependencies, ddev commands, kenkeep pack use. |
-| `hooks/PRE_PLAN.md` | Search core, the module, its dependencies, and drupal.org before designing. Backwards compatibility is the default. Plan the test tier of each behavior. |
-| `hooks/POST_PLAN.md` | Requires the new plan sections and ddev/Drush Self Validation. |
-| `hooks/PRE_TASK_EXECUTION.md` | TDD with Unit tests. Kernel and higher tiers are written but not run inside a phase. |
-| `hooks/POST_PHASE.md` | PHPCS and PHPStan on changed files, phase Unit tests only. |
-| `hooks/POST_EXECUTION.md` | One scoped run of every test tier, install/uninstall cycle, update functions, dependency declarations. |
-| `hooks/CODE_REVIEW.md` | Adds Drupal defects (access checks, cache metadata, escaping, schema, undeclared dependencies, BC breaks). |
+| `shared/drupal-contrib.md` | New. Shared rules: commands, test tiers, architecture, configuration, backwards compatibility, dependencies, kenkeep pack. |
+| `hooks/PRE_PLAN.md` | Search for existing solutions first; plan BC and test tiers. |
+| `hooks/POST_PLAN.md` | Requires the new plan sections and ddev Self Validation. |
+| `hooks/PRE_TASK_EXECUTION.md` | Unit TDD; higher tiers written by one final-phase task, not run. |
+| `hooks/POST_PHASE.md` | PHPCS, PHPStan, and Unit tests on the phase's changes. |
+| `hooks/POST_EXECUTION.md` | One scoped run of all tiers, install/uninstall, updates, dependencies. |
+| `hooks/CODE_REVIEW.md` | Adds Drupal defects. |
 | `hooks/TASK_EXECUTION_ROUTING.md` | Drupal routing guidance. |
-| `templates/PLAN_TEMPLATE.md` | New sections: Existing Solutions Considered; Public API and Backwards Compatibility; Configuration, Schema, and Update Path; Test Plan. |
-| `config.yaml` | Drupal descriptions for the three routing profiles. Harness arguments and models are the Strikethroo defaults; adjust them for your machine. |
+| `templates/PLAN_TEMPLATE.md` | New sections for existing solutions, public API, configuration, and tests. |
+| `config.yaml` | Drupal routing profile descriptions. Adjust harnesses and models for your machine. |
 
-The other hooks and templates come from the Strikethroo defaults.
-
-## Requirements
-
-The hooks use the [ddev-drupal-contrib](https://github.com/ddev/ddev-drupal-contrib)
-commands. Without ddev, the agent asks you how to run PHPUnit, PHPCS,
-PHPStan, and Drush.
+Other hooks and templates are the Strikethroo defaults. The hooks use
+[ddev-drupal-contrib](https://github.com/ddev/ddev-drupal-contrib); without
+it, the agent asks how to run PHPUnit, PHPCS, PHPStan, and Drush.

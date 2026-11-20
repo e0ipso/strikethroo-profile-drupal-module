@@ -24,5 +24,5 @@ recommends:
     name: ddev-drupal-contrib
     install: ddev add-on get ddev/ddev-drupal-contrib
   - kind: tool
-    name: kenkeep-pack-drupal (2.1.1 or later)
+    name: kenkeep-pack-drupal (2.2.0 or later)
     install: npx kenkeep pack import e0ipso/kenkeep-pack-drupal
