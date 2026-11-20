@@ -1,0 +1,28 @@
+schema_version: 1
+name: drupal-contrib-module
+description: Plan and build Drupal contrib modules with cheap test loops, SOLID services, and Drupal conventions.
+purpose: >-
+  Tunes Strikethroo for a repository that contains one Drupal contrib module
+  (no site). Planning looks for an existing solution in core and on
+  drupal.org before it designs new code, keeps logic in injectable services,
+  separates shipped configuration from code, and treats the public API as a
+  backwards-compatibility contract. Execution runs only unit tests inside a
+  phase and runs Kernel, Functional, and FunctionalJavascript tests once,
+  scoped to the module, after all phases. Hooks read the kenkeep Drupal
+  knowledge pack when it is installed.
+tags:
+  - drupal
+  - drupal-contrib
+  - php
+  - phpunit
+author: Mateu Aguiló Bosch
+recommends:
+  - kind: tool
+    name: ddev
+    install: https://ddev.readthedocs.io/en/stable/users/install/
+  - kind: tool
+    name: ddev-drupal-contrib
+    install: ddev add-on get ddev/ddev-drupal-contrib
+  - kind: tool
+    name: kenkeep-pack-drupal (2.1.1 or later)
+    install: npx kenkeep pack import e0ipso/kenkeep-pack-drupal

@@ -1,0 +1,139 @@
+# Strikethroo workspace configuration.
+#
+# This file is local to this workspace and ignored by the workspace .gitignore.
+# Harness permissions, installed models, and routing preferences can differ by
+# developer and machine. Edit it directly or through the Config tab of the
+# Customize section in the web app (`npx strikethroo serve`). Saving from the
+# web UI rewrites this file and does not preserve comments.
+#
+# Sections:
+#   code_review — report-only review in a clean session, enabled only by an
+#     explicit true boolean. Missing also means false. CODE_REVIEW.md supplies
+#     the mandate after opt-in; its presence alone never enables review.
+#     Review prefers a ready harness other than the current one, then falls
+#     back to the current harness. Review rejects session-reuse cli_args.
+#   harnesses — exact ordered argv elements added when Strikethroo invokes the
+#     named external CLI. The local user owns the resulting permissions. Values
+#     are never split or shell-expanded. Keep secrets and machine paths out of
+#     argv; use each harness's authentication and user configuration instead.
+#   execution_routing — automatic per-task execution routing. Profiles are
+#     arbitrary, project-defined routing categories;
+#     each `description` tells the task-generation LLM when the profile
+#     applies, and `models` is a list of execution targets (`model` required;
+#     `harness` and `reasoning_effort` optional). `model` is an exact id or a
+#     family name such as `gpt-sol` or `grok`. For a harness other than Claude,
+#     the readiness check asks that harness to list its models and map each
+#     family name to the newest listed id at the target's effort; Strikethroo
+#     accepts only ids that appear in the list. Claude names pass through,
+#     because Claude resolves `opus` and `sonnet` itself. Task generation saves
+#     only the selected profile. Immediately before each task delegation, the
+#     first eligible, non-avoided target in configured order is selected by default. One
+#     optional global `resolver.script` (repository-relative) can instead
+#     receive that task's eligible configured targets and accumulated avoid set
+#     and return one non-avoided target identifier. Routing is off while
+#     `enabled` is false (profiles are kept but not validated or used) or while
+#     `profiles` is empty; an absent `enabled` means on. See the customization
+#     guide for the full contract and an illustrative example:
+#     https://strikethroo.canpicasoft.com/customization.html
+
+code_review:
+  enabled: false
+
+# Reviews use the strongest model for each harness at `xhigh` effort.
+# Task routing appends its model and effort after these defaults.
+# Model names here and in execution_routing can be exact ids or families.
+# Claude resolves `opus` and `sonnet` itself. For other harnesses, the
+# readiness check maps each family name (`gpt-sol`, `grok-xhigh`) to the
+# newest id that harness lists, so new releases are used without edits.
+harnesses:
+  claude:
+    cli_args:
+      - --dangerously-skip-permissions
+      - --model
+      - opus
+      - --effort
+      - xhigh
+  codex:
+    cli_args:
+      - --sandbox
+      - workspace-write
+      - --config
+      - 'model="gpt-sol"'
+      - --config
+      - 'model_reasoning_effort="xhigh"'
+  cursor:
+    cli_args:
+      - --force
+      - --model
+      - grok-xhigh
+  gemini:
+    cli_args:
+      - --approval-mode
+      - yolo
+  copilot:
+    cli_args:
+      - --allow-all
+
+execution_routing:
+  enabled: true
+  # Restrict task targets to the orchestrator's harness unless explicitly enabled.
+  # Missing also means false. This does not affect code review. Review rejects
+  # harnesses.<h>.cli_args that reuse a session (for example --resume).
+  allow_external_harness_execution: false
+  profiles:
+    docs-and-config:
+      description: >-
+        Prose and package metadata with no PHP logic: README, hook_help()
+        text, .api.php docblocks, change records, and .info.yml or
+        composer.json edits that add no dependency. Typical skills: markdown,
+        technical-writing, documentation, yaml. Complexity score roughly 3-4.
+        Configuration YAML that adds or changes schema is not this profile.
+      models:
+        - model: sonnet
+          harness: claude
+          reasoning_effort: medium
+        - model: gpt-terra
+          harness: codex
+          reasoning_effort: low
+        - model: grok
+          harness: cursor
+          reasoning_effort: low
+    standard-implementation:
+      description: >-
+        Everyday Drupal module work scoped to a handful of files with clear
+        acceptance criteria: services, plugins, OOP hooks, forms,
+        controllers, Twig templates, libraries, configuration with schema,
+        Drush commands, and their Unit or Kernel tests. Typical skills: php,
+        drupal, drupal-backend, drupal-frontend, twig, phpunit, yaml, drush.
+        Complexity score roughly 4-6. This is the default profile when a task
+        fits neither docs-and-config nor complex-architecture.
+      models:
+        - model: opus
+          harness: claude
+          reasoning_effort: medium
+        - model: gpt-sol
+          harness: codex
+          reasoning_effort: high
+        - model: grok
+          harness: cursor
+          reasoning_effort: high
+    complex-architecture:
+      description: >-
+        High-risk or design-heavy Drupal work: public API design and
+        deprecations, new plugin types or events, entity and field storage
+        definitions, update functions and data migrations, access control and
+        permissions, cache metadata in render output, security-sensitive
+        input handling, and Functional or FunctionalJavascript tests. Typical
+        skills: drupal-architecture, entity-api, update-path, access-control,
+        cache-api, secure-coding, refactoring. Complexity score roughly 6-7,
+        or any task that changes what other modules depend on.
+      models:
+        - model: opus
+          harness: claude
+          reasoning_effort: xhigh
+        - model: gpt-sol
+          harness: codex
+          reasoning_effort: xhigh
+        - model: grok
+          harness: cursor
+          reasoning_effort: xhigh
