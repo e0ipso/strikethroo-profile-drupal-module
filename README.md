@@ -8,10 +8,7 @@ npx strikethroo init --harnesses claude --profile <this-repo>
 npx kenkeep pack import e0ipso/kenkeep-pack-drupal   # recommended, 2.2.0 or later
 ```
 
-Use pack 2.2.0 or later: earlier releases recommend the lightest test tier,
-which conflicts with this profile's testing rules. Without the pack, the hooks
-use `config/shared/drupal-contrib.md` alone. The agent runs hooks and
-`config.yaml` with its own permissions, so read them before you import.
+For optimal results use this in combination with [kenkeep-pack-drupal](https://www.github.com/e0ipso/kenkeep-pack-drupal).
 
 ## What it changes
 
@@ -28,6 +25,4 @@ use `config/shared/drupal-contrib.md` alone. The agent runs hooks and
 | `templates/PLAN_TEMPLATE.md` | New sections for existing solutions, public API, configuration, and tests. |
 | `config.yaml` | Drupal routing profile descriptions. Adjust harnesses and models for your machine. |
 
-Other hooks and templates are the Strikethroo defaults. The hooks use
-[ddev-drupal-contrib](https://github.com/ddev/ddev-drupal-contrib); without
-it, the agent asks how to run PHPUnit, PHPCS, PHPStan, and Drush.
+Other hooks and templates are the Strikethroo defaults.
